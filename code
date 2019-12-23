@@ -27,3 +27,105 @@ class_name = 'CLASS_LABEL'
 df = pd.read_csv('MW_DATA_' + course + '.csv')
 
 print(df.shape)
+
+#for group in groups:
+group =  'XE';   
+print(group)
+
+df_filtered = df[df.AIMAG_CITY == group]
+
+feature_names = df.columns
+
+# label encoding class
+class MultiColumnLabelEncoder:
+    def __init__(self, columns = None):
+        self.columns = columns # array of column names to encode
+
+    def fit(self, X, y = None):
+        return self # not relevant here
+
+    def transform(self, X):
+        output = X.copy()
+        if self.columns is not None:
+            for col in self.columns:
+                output[col] = LabelEncoder().fit_transform(output[col])
+        else:
+            for colname,col in output.iteritems():
+                output[colname] = LabelEncoder().fit_transform(col)
+        return output
+
+    def fit_transform(self, X, y = None):
+        return self.fit(X, y).transform(X)
+
+df_filtered = MultiColumnLabelEncoder(columns = feature_names.append(class_name)).fit_transform(df_filtered)
+
+#print(df_filtered)
+X = df_filtered[feature_names]
+y = df_filtered[class_name]
+
+# Split dataset into training set and test set
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1) # 80% training and 20% test
+
+g = [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+
+exps = []
+
+for i in g:    
+    aa = list(combinations(feature_names, i))
+    for a in aa:
+        exp = []
+        for a1 in a:
+            exp.append(a1)
+                
+        exps.append(exp)
+exps
+
+log_date = []
+courses = []
+models = []
+elapsed_times = []
+accuracy = []
+recall = []
+precision = []
+f1 = []
+features = []
+
+X_train_temp = X_train
+X_test_temp = X_test
+
+# Боломжит хослолоор давталт гүйлгэх
+for exp in exps:
+    
+    X_train = X_train_temp[exp]
+    X_test = X_test_temp[exp]
+    model_type = 'SVM'
+
+    start_time = timeit.default_timer()
+
+    classifier = SVC(kernel='linear') 
+    classifier.fit(X_train, y_train)
+
+    y_pred = classifier.predict(X_test)
+
+    elapsed_time = timeit.default_timer() - start_time
+    elapsed_time = '{:.1f}'.format(elapsed_time)
+
+    # log файл бичих          
+    fmt = "{:.3f}"
+    log_date.append(datetime.datetime.now())
+    courses.append(course)
+    elapsed_times.append(elapsed_time)
+    models.append(model_type)
+    accuracy.append(fmt.format(accuracy_score(y_test, y_pred)))
+    recall.append(fmt.format(recall_score(y_test, y_pred, average='weighted', labels=np.unique(y_pred))))
+    precision.append(fmt.format(precision_score(y_test, y_pred, average='weighted', labels=np.unique(y_pred))))
+    f1.append(fmt.format(f1_score(y_test, y_pred, average='weighted', labels=np.unique(y_pred))))
+    features.append(exp)
+
+result = {"log_date":log_date, 
+        "course":courses, "model_type": models, "elapsed_time":elapsed_times, 
+        "ac":accuracy, "pr":precision, "re":recall, "f1":f1, "features":features}
+
+#print(pd.DataFrame(result))
+logDf = pd.DataFrame(result);
+logDf.to_csv('ml_result_secSVMGr_'+course+'.csv')

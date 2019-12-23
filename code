@@ -1,0 +1,29 @@
+import datetime
+import numpy as np
+import pandas as pd
+import timeit
+
+from sklearn.model_selection import train_test_split 
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report
+from sklearn.metrics import f1_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import accuracy_score
+
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn.neural_network import MLPClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from itertools import combinations 
+from sklearn.ensemble import RandomForestClassifier
+
+# data import
+course = 'MAT1'
+class_name = 'CLASS_LABEL'
+
+df = pd.read_csv('MW_DATA_' + course + '.csv')
+
+print(df.shape)
